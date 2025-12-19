@@ -26,9 +26,14 @@ Ein hochkomplexer, immersiver Audio-Visualizer, der mehrere fortgeschrittene Web
 
 ## 🎨 Farbpalette
 
-- **Sub-Bass & Bass:** Tiefes Weinrot → Magenta
-- **Mitten:** Tiefes Indigo
-- **Höhen:** Tiefes Blau
+- Öffne das Farb-Panel über den Button "🎨 Farben".
+- Overlay steuern:
+  - Waveform: Stroke/Fill jeweils für Normal und Peak.
+  - Average Circle: Line/Fill jeweils für Normal und Peak, inkl. separater Alpha-Regler.
+- Fluid-Farben: Eigene Farben für Sub, Bass A/B, Mid, Treble A/B.
+- Persistenz: Einstellungen werden in `localStorage` (`vab_palette`) gespeichert und beim Start geladen.
+- Zurücksetzen: Stellt die Standardpalette wieder her.
+- Hinweis: Nur Farben/Helligkeit werden geändert, Physik/Bewegung bleibt unverändert.
 
 ## 📁 Installation
 
@@ -52,6 +57,10 @@ Keine Abhängigkeiten oder Build-Tools erforderlich — reines HTML/CSS/JavaScri
 
 ## 🆕 Änderungen
 
+- Farb-Panel: Live anpassbare Palette für Overlay (inkl. Alpha) und Fluid.
+- Persistenz: Speichert Benutzerfarben in `localStorage` und lädt sie beim Start.
+- Adaptive FFT: `analyser.fftSize` passt sich der Bildschirmauflösung an (512/1024/2048/4096).
+- Blau-Intensität (Mid/Treble) verstärkt für bessere Sichtbarkeit.
 - Erweiterte Audio-Unterstützung: mp3, flac, wav, ogg/oga, m4a/aac, opus, weba.
 - Native Playlist-Unterstützung: m3u/m3u8, pls, asx, xspf (lokale Einträge werden mit hochgeladenen Dateien abgeglichen; Remote-URLs werden direkt verwendet).
 
