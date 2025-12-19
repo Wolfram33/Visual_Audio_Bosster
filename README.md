@@ -1,6 +1,6 @@
 # 🎵 Audio Fluid Visualizer
 
-An immersive audio visualizer that blends a WebGL fluid simulation with a reactive waveform circle. It responds in real time to sub-bass, bass, mids, and highs with a cinematic palette of deep wine reds and blues.
+Ein hochkomplexer, immersiver Audio-Visualizer, der mehrere fortgeschrittene Web-Technologien zu einem einheitlichen System vereint. Die Integration von WebGL Fluid Simulation, Echtzeit-Audio-Analyse, Beat-Detection und reaktiver Waveform-Visualisierung erforderte umfangreiche Entwicklungsarbeit in den Bereichen Audio-Processing, Shader-Programmierung und Performance-Optimierung. Das System reagiert in Echtzeit auf Sub-Bass, Bass, Mitten und Höhen mit einer kinematischen Palette aus tiefen Weinrot- und Blautönen.
 
 ## 🔴 Live Demo
 
@@ -10,79 +10,88 @@ An immersive audio visualizer that blends a WebGL fluid simulation with a reacti
 
 ## ✨ Features
 
-- **WebGL Fluid Simulation** – Organic fluid motion driven by the music
-- **Beat Detection** – Separate triggers for sub-bass, bass, mids, and highs
-- **Waveform Circle** – Rotating circle that visualizes the waveform
-- **Average Circle** – Pulsing ring based on overall loudness
-- **4K Support** – Tuned for high-resolution displays
-- **Playlist & Multi-select** – Load audio files (mp3, flac, wav, ogg/oga, m4a/aac, opus, weba) and playlist files (m3u/m3u8, pls, asx, xspf)
-- **Mouse/Touch Interaction** – Draw into the fluid manually
+- **WebGL Fluid Simulation** – Organische Flüssigkeitsbewegung, die von der Musik angetrieben wird
+- **Beat Detection** – Separate Trigger für Sub-Bass, Bass, Mitten und Höhen
+- **Waveform Circle** – Rotierender Kreis, der die Wellenform visualisiert
+- **Average Circle** – Pulsierender Ring basierend auf der Gesamtlautstärke
+- **4K Support** – Optimiert für hochauflösende Displays
+- **Playlist & Multi-Select** – Laden von Audiodateien (mp3, flac, wav, ogg/oga, m4a/aac, opus, weba) und Playlist-Dateien (m3u/m3u8, pls, asx, xspf)
+- **Maus-/Touch-Interaktion** – Manuelles Zeichnen in die Flüssigkeit
 
 ## 🚀 Demo
 
 **Live:** [robderoy.de/apps/sound](https://robderoy.de/apps/sound/)
 
-Locally: open `index.html` in your browser, load one or more audio files or a playlist, and enjoy.
+**Lokal:** Öffne `index.html` in deinem Browser, lade eine oder mehrere Audiodateien oder eine Playlist und genieße.
 
-## 🎨 Color Palette
+## 🎨 Farbpalette
 
-- **Sub-bass & Bass:** Deep wine red → magenta
-- **Mids:** Deep indigo
-- **Highs:** Deep blue
+- **Sub-Bass & Bass:** Tiefes Weinrot → Magenta
+- **Mitten:** Tiefes Indigo
+- **Höhen:** Tiefes Blau
 
 ## 📁 Installation
 
 ```bash
 git clone https://github.com/Wolfram33/Visual_Audio_Booster-for-Browsers.git
 cd Visual_Audio_Booster-for-Browsers
-# Open index.html in your browser
+# Öffne index.html in deinem Browser
 ```
 
-No dependencies or build tools needed — pure HTML/CSS/JavaScript.
+Keine Abhängigkeiten oder Build-Tools erforderlich — reines HTML/CSS/JavaScript.
 
-## 🎛️ Controls
+## 🎛️ Steuerung
 
-| Action | Function |
+| Aktion | Funktion |
 |--------|----------|
-| 📁 Load Audio/Playlist | Select audio files (mp3, flac, wav, ogg/oga, m4a/aac, opus, weba) or playlist files (m3u/m3u8, pls, asx, xspf) |
-| ⏮️ | Previous track |
-| ▶️ / ⏸️ | Play / Pause |
-| ⏭️ | Next track |
-| Drag with mouse/touch | Draw into the fluid |
+| 📁 Audio/Playlist laden | Audiodateien (mp3, flac, wav, ogg/oga, m4a/aac, opus, weba) oder Playlist-Dateien (m3u/m3u8, pls, asx, xspf) auswählen |
+| ⏮️ | Vorheriger Track |
+| ▶️ / ⏸️ | Abspielen / Pause |
+| ⏭️ | Nächster Track |
+| Ziehen mit Maus/Touch | In die Flüssigkeit zeichnen |
 
-## 🆕 What changed
+## 🆕 Änderungen
 
-- Broader audio support: mp3, flac, wav, ogg/oga, m4a/aac, opus, weba.
-- Native playlist support: m3u/m3u8, pls, asx, xspf (local entries are matched to uploaded files; remote URLs are used directly).
+- Erweiterte Audio-Unterstützung: mp3, flac, wav, ogg/oga, m4a/aac, opus, weba.
+- Native Playlist-Unterstützung: m3u/m3u8, pls, asx, xspf (lokale Einträge werden mit hochgeladenen Dateien abgeglichen; Remote-URLs werden direkt verwendet).
 
-## 🙏 Credits & Attribution
+## 🙏 Credits & Danksagungen
 
-This project combines and extends the excellent work of:
+Dieses Projekt kombiniert und erweitert die exzellente Arbeit von:
 
 ### WebGL Fluid Simulation
 **Pavel Dobryakov**
 - GitHub: [github.com/PavelDoGreat/WebGL-Fluid-Simulation](https://github.com/PavelDoGreat/WebGL-Fluid-Simulation)
-- Foundation for the fluid simulation
-- MIT License
+- Grundlage für die Fluid-Simulation
+- MIT Lizenz
 
 ### Waveform Circle & Average Circle
 **Noel Delgado** (@pixelia_me)
 - CodePen: [codepen.io/noeldelgado/pen/EaNjBy](https://codepen.io/noeldelgado/pen/EaNjBy)
 - Website: [pixelia.me](https://pixelia.me)
-- Inspiration for the waveform circle and average circle
-- Music in the original demo: Term and Conditions Mixes
+- Inspiration für Waveform Circle und Average Circle
+- Musik im Original-Demo: Term and Conditions Mixes
 
-### Combination & Extensions
+### Umfangreiche System-Integration & Eigenentwicklung
 **Rob de Roy** – [www.robderoy.de](https://www.robderoy.de)
-- Audio-reactive fluid tuning
-- Beat detection for sub-bass, bass, mids, highs
-- Color optimization for dark, atmospheric visuals
-- 4K display tuning
-- Playlist functionality
 
-## 📄 License
+**Technische Kernentwicklung:**
+- **Audio-Engine Integration:** Vollständige WebAudio API Implementierung mit AnalyserNode, frequenzspezifischer Filterung und Echtzeit-FFT-Analyse
+- **Advanced Beat Detection System:** Eigenentwickelte Multi-Band-Erkennung für Sub-Bass (20-60Hz), Bass (60-250Hz), Mitten (250Hz-2kHz) und Höhen (2kHz+) mit adaptiven Schwellwerten
+- **Audio-Reactive Fluid Dynamics:** Komplexe Mapping-Logik zwischen Frequenzbändern und WebGL-Shader-Parametern (Splat-Radius, Velocity, Curl, Dissipation)
+- **Multi-Emitter System:** 5-Punkt-Emitter-Array mit frequenzbasierter Farbzuordnung und dynamischer Positionierung
+- **Dual-Canvas Rendering Pipeline:** Synchronisierte Darstellung von WebGL-Fluid (Background) und 2D-Overlay (Waveform/Average Circle)
+- **Performance-Optimierung:** Frame-Timing, RequestAnimationFrame-Synchronisation, Audio-Buffer-Management für flüssige 60fps auch bei 4K
+- **Playlist-Engine:** Parser für M3U/M3U8, PLS, ASX, XSPF mit Multi-Format-Audio-Support (MP3, FLAC, WAV, OGG/OGA, M4A/AAC, Opus, WebA)
+- **Color System:** Frequenz-zu-Farb-Mapping mit HSL-Berechnungen für atmosphärische Visualisierung
+- **Cross-Browser Compatibility:** WebGL 1/2 Fallback-Logic, Audio-Context-Handling, Touch-/Mouse-Event-Normalisierung
 
-MIT License – see [LICENSE](LICENSE)
+**Entwicklungsaufwand:**
+Die Integration der verschiedenen Technologien und die Entwicklung eines stabilen, performanten Systems stellte erhebliche technische Herausforderungen dar. Die Synchronisation von Audio-Analyse, Shader-basierter Fluid-Simulation und Canvas-Rendering erforderte intensive Arbeit an Timing, Memory-Management und Browser-Kompatibilität.
+
+## 📄 Lizenz
+
+MIT Lizenz – siehe [LICENSE](LICENSE)
 
 ```
 MIT License
@@ -108,18 +117,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## 🤝 Contributing
+## 🤝 Mitwirken
 
-Pull requests are welcome! For larger changes, please open an issue first.
+Pull Requests sind willkommen! Bei größeren Änderungen bitte zuerst ein Issue öffnen.
 
-## 💡 Ideas for Extensions
+## 💡 Ideen für Erweiterungen
 
-- [ ] Microphone input support
-- [ ] Switchable color schemes
-- [ ] Fullscreen button
-- [ ] Adjustable sensitivity
-- [ ] Export to video
+- [ ] Mikrofon-Eingabe-Unterstützung
+- [ ] Wechselbare Farbschemata
+- [ ] Einstellbare Empfindlichkeit
+- [ ] Video-Export
 
 ---
 
-Made with 🎵 and WebGL
+Gemacht mit 🎵 und WebGL

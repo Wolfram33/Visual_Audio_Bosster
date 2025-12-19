@@ -31,10 +31,10 @@ const waveform_tick = 0.05;
 const TOTAL_POINTS = 512;
 let points = [];
 
-const bubble_avg_color = "rgba(29, 36, 57, 0.1)";
-const bubble_avg_color_2 = "rgba(29, 36, 57, 0.05)";
+const bubble_avg_color = "rgba(29, 36, 57, 0.5)";
+const bubble_avg_color_2 = "rgba(77, 218, 248, 0.3)";
 const bubble_avg_line_color = "rgba(77, 218, 248, 1)";
-const bubble_avg_line_color_2 = "rgba(77, 218, 248, 1)";
+const bubble_avg_line_color_2 = "rgba(120, 240, 255, 1)";
 const AVG_BREAK_POINT = 100;
 let avg_circle;
 
