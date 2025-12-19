@@ -27,16 +27,17 @@ const waveform_color = "rgba(26, 26, 28, 0.38)";
 const waveform_color_2 = "rgba(250, 246, 5, 0.18)";
 const waveform_line_color = "rgba(255, 255, 255, 0.29)";
 const waveform_line_color_2 = "rgba(254, 254, 254, 0.11)";
-const waveform_tick = 0.05;
+const waveform_tick = 0.03;
 const TOTAL_POINTS = 512;
 let points = [];
 
 const bubble_avg_color = "rgba(0, 64, 255, 0.09)";
-const bubble_avg_color_2 = "rgba(0, 207, 253, 0.24)";
+const bubble_avg_color_2 = "rgba(0, 207, 253, 0.11)";
 const bubble_avg_line_color = "rgba(77, 217, 248, 0.27)";
-const bubble_avg_line_color_2 = "rgba(10, 248, 66, 0.08)";
+const bubble_avg_line_color_2 = "rgba(248, 236, 10, 0.12)";
 const AVG_BREAK_POINT = 100;
 let avg_circle;
+let waveformAmplitude = 3.75;
 
 const PI = Math.PI;
 const PI_TWO = PI * 2;
@@ -129,6 +130,12 @@ function loadPalette(){
 }
 function savePalette(){ try{ localStorage.setItem('vab_palette', JSON.stringify(palette)); }catch(e){} }
 
+function loadCircleAmplitude(){
+  try{ const val = localStorage.getItem('vab_waveformAmplitude'); if (val !== null) return parseFloat(val); }catch(e){}
+  return 3.75;
+}
+function saveCircleAmplitude(){ try{ localStorage.setItem('vab_waveformAmplitude', String(waveformAmplitude)); }catch(e){} }
+
 let palette = loadPalette();
 
 function colorFromPalette(key, scale){
@@ -218,6 +225,14 @@ function setupPaletteUI(){
   bindFluid('midColor', 'mid');
   bindFluid('trebleAColor', 'trebleA');
   bindFluid('trebleBColor', 'trebleB');
+  
+  // Circle Amplitude
+  const ampSlider = document.getElementById('circleAmplitude');
+  if (ampSlider) {
+    waveformAmplitude = loadCircleAmplitude();
+    ampSlider.value = String(waveformAmplitude);
+    ampSlider.addEventListener('input', ()=>{ waveformAmplitude = parseFloat(ampSlider.value); saveCircleAmplitude(); });
+  }
 }
 
 // ========== AUDIO INIT ==========
@@ -702,7 +717,7 @@ function drawWaveform() {
 
   overlayCtx.moveTo(points[0].dx, points[0].dy);
 
-  const waveformScale = 3.75; // Verstärkungsfaktor für die Ausschläge
+  const waveformScale = waveformAmplitude; // Verstärkungsfaktor für die Ausschläge
   
   for (let i = 0; i < TOTAL_POINTS - 1; i++) {
     let p = points[i];
