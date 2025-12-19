@@ -23,18 +23,18 @@ let lastSubBass = 0, lastBass = 0, lastMid = 0;
 let subBassEnergy = 0, bassEnergy = 0;
 
 // ========== OVERLAY VARIABLEN (Waveform + Avg Circle) ==========
-const waveform_color = "rgba(29, 36, 57, 0.05)";
-const waveform_color_2 = "rgba(0,0,0,0)";
-const waveform_line_color = "rgba(157, 242, 157, 0.11)";
-const waveform_line_color_2 = "rgba(157, 242, 157, 0.8)";
+const waveform_color = "rgba(26, 26, 28, 0.38)";
+const waveform_color_2 = "rgba(250, 246, 5, 0.18)";
+const waveform_line_color = "rgba(255, 255, 255, 0.29)";
+const waveform_line_color_2 = "rgba(254, 254, 254, 0.11)";
 const waveform_tick = 0.05;
 const TOTAL_POINTS = 512;
 let points = [];
 
-const bubble_avg_color = "rgba(29, 36, 57, 0.5)";
-const bubble_avg_color_2 = "rgba(77, 218, 248, 0.3)";
-const bubble_avg_line_color = "rgba(77, 218, 248, 1)";
-const bubble_avg_line_color_2 = "rgba(120, 240, 255, 1)";
+const bubble_avg_color = "rgba(0, 64, 255, 0.09)";
+const bubble_avg_color_2 = "rgba(0, 207, 253, 0.24)";
+const bubble_avg_line_color = "rgba(77, 217, 248, 0.27)";
+const bubble_avg_line_color_2 = "rgba(10, 248, 66, 0.08)";
 const AVG_BREAK_POINT = 100;
 let avg_circle;
 
@@ -51,12 +51,195 @@ let AVG_BREAK_POINT_HIT = false;
 
 let overlayCtx;
 
+// ========== FARB-PALETTE & HELFER ==========
+const defaultPalette = {
+  overlay: {
+    wave: {
+      stroke: waveform_line_color,
+      strokePeak: waveform_line_color_2,
+      fill: waveform_color,
+      fillPeak: waveform_color_2,
+    },
+    bubble: {
+      line: bubble_avg_line_color,
+      linePeak: bubble_avg_line_color_2,
+      fill: bubble_avg_color,
+      fillPeak: bubble_avg_color_2,
+    }
+  },
+  fluid: {
+    sub: { base: [8, 0.5, 2] },
+    bassA: { base: [6, 0.3, 1.5] },
+    bassB: { base: [5, 0.2, 4] },
+    mid: { base: [0.3, 0.2, 3.6] },
+    trebleA: { base: [0.15, 0.3, 2.4] },
+    trebleB: { base: [0.2, 0.15, 2.1] },
+  }
+};
+
+function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+function mergeDefaults(base, patch){
+  if (!patch) return deepClone(base);
+  const out = deepClone(base);
+  for (const k in patch){
+    if (patch[k] && typeof patch[k] === 'object' && !Array.isArray(patch[k])) {
+      out[k] = mergeDefaults(base[k] || {}, patch[k]);
+    } else {
+      out[k] = patch[k];
+    }
+  }
+  return out;
+}
+
+function parseRgba(str){
+  const m = String(str).match(/rgba?\(([^)]+)\)/i);
+  if (!m) return { r:255, g:255, b:255, a:1 };
+  const parts = m[1].split(',').map(v => parseFloat(v.trim()));
+  return { r: parts[0]||0, g: parts[1]||0, b: parts[2]||0, a: (parts[3]!==undefined? parts[3]:1) };
+}
+function rgbToHex(r,g,b){
+  const toHex = (n)=>{
+    const s = Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2,'0');
+    return s;
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+function rgbaToHex(rgbaStr){ const {r,g,b} = parseRgba(rgbaStr); return rgbToHex(r,g,b); }
+function hexToRgb(hex){
+  let h = hex.replace('#','');
+  if (h.length===3) h = h.split('').map(c=>c+c).join('');
+  const r = parseInt(h.slice(0,2),16);
+  const g = parseInt(h.slice(2,4),16);
+  const b = parseInt(h.slice(4,6),16);
+  return {r,g,b};
+}
+function withAlphaFromRgba(hex, rgbaStr){ const {a} = parseRgba(rgbaStr); const {r,g,b} = hexToRgb(hex); return `rgba(${r}, ${g}, ${b}, ${a})`; }
+
+const fluidStrength = {};
+Object.keys(defaultPalette.fluid).forEach(k=>{
+  const v = defaultPalette.fluid[k].base; fluidStrength[k] = Math.hypot(v[0],v[1],v[2]) || 1;
+});
+function baseToHex(base){ const len = Math.hypot(base[0],base[1],base[2])||1; const dir=[base[0]/len, base[1]/len, base[2]/len]; return rgbToHex(dir[0]*255, dir[1]*255, dir[2]*255); }
+function hexToBase(hex, key){ const {r,g,b} = hexToRgb(hex); const v=[r/255, g/255, b/255]; const l=Math.hypot(v[0],v[1],v[2])||1; const unit=[v[0]/l, v[1]/l, v[2]/l]; const s = fluidStrength[key]||1; return [unit[0]*s, unit[1]*s, unit[2]*s]; }
+
+function loadPalette(){
+  try{ const raw = localStorage.getItem('vab_palette'); if (raw){ return mergeDefaults(defaultPalette, JSON.parse(raw)); } }catch(e){}
+  return deepClone(defaultPalette);
+}
+function savePalette(){ try{ localStorage.setItem('vab_palette', JSON.stringify(palette)); }catch(e){} }
+
+let palette = loadPalette();
+
+function colorFromPalette(key, scale){
+  const b = palette.fluid[key].base; const s = scale||1; return [b[0]*s, b[1]*s, b[2]*s];
+}
+
+function togglePalette(){ const el = document.getElementById('palettePanel'); if (!el) return; el.style.display = (el.style.display==='none' || !el.style.display)? 'block':'none'; }
+function resetPalette(){ palette = loadPalette(); palette = deepClone(defaultPalette); savePalette(); applyPaletteToInputs(); }
+function applyPaletteToInputs(){
+  const ids = {
+    waveStroke: palette.overlay.wave.stroke,
+    waveStrokePeak: palette.overlay.wave.strokePeak,
+    waveFill: palette.overlay.wave.fill,
+    waveFillPeak: palette.overlay.wave.fillPeak,
+    bubbleLine: palette.overlay.bubble.line,
+    bubbleLinePeak: palette.overlay.bubble.linePeak,
+    bubbleFill: palette.overlay.bubble.fill,
+    bubbleFillPeak: palette.overlay.bubble.fillPeak,
+  };
+  Object.entries(ids).forEach(([id, rgba])=>{ const el = document.getElementById(id); if (el) el.value = rgbaToHex(rgba); });
+  // Alpha-Slider setzen
+  const alphaMap = {
+    bubbleLineAlpha: palette.overlay.bubble.line,
+    bubbleLinePeakAlpha: palette.overlay.bubble.linePeak,
+    bubbleFillAlpha: palette.overlay.bubble.fill,
+    bubbleFillPeakAlpha: palette.overlay.bubble.fillPeak,
+  };
+  Object.entries(alphaMap).forEach(([id, rgba])=>{ const el = document.getElementById(id); if (el) el.value = String(parseRgba(rgba).a); });
+  const fids = {
+    subColor: palette.fluid.sub.base,
+    bassAColor: palette.fluid.bassA.base,
+    bassBColor: palette.fluid.bassB.base,
+    midColor: palette.fluid.mid.base,
+    trebleAColor: palette.fluid.trebleA.base,
+    trebleBColor: palette.fluid.trebleB.base,
+  };
+  Object.entries(fids).forEach(([id, base])=>{ const el = document.getElementById(id); if (el) el.value = baseToHex(base); });
+}
+function setupPaletteUI(){
+  // Bind global toggles
+  window.togglePalette = togglePalette; window.resetPalette = resetPalette;
+  applyPaletteToInputs();
+  // Overlay handlers
+  const bindOverlay = (id, path)=>{
+    const el = document.getElementById(id); if (!el) return;
+    el.addEventListener('input', ()=>{
+      const hex = el.value;
+      const current = path.reduce((acc,k)=>acc[k], palette);
+      const updated = withAlphaFromRgba(hex, current);
+      let ref = palette; for (let i=0;i<path.length-1;i++){ ref = ref[path[i]]; }
+      ref[path[path.length-1]] = updated; savePalette();
+    });
+  };
+  bindOverlay('waveStroke', ['overlay','wave','stroke']);
+  bindOverlay('waveStrokePeak', ['overlay','wave','strokePeak']);
+  bindOverlay('waveFill', ['overlay','wave','fill']);
+  bindOverlay('waveFillPeak', ['overlay','wave','fillPeak']);
+  bindOverlay('bubbleLine', ['overlay','bubble','line']);
+  bindOverlay('bubbleLinePeak', ['overlay','bubble','linePeak']);
+  bindOverlay('bubbleFill', ['overlay','bubble','fill']);
+  bindOverlay('bubbleFillPeak', ['overlay','bubble','fillPeak']);
+  // Overlay alpha handlers
+  const setOverlayAlpha = (path, a)=>{
+    let current = path.reduce((acc,k)=>acc[k], palette);
+    const {r,g,b} = parseRgba(current);
+    let ref = palette; for (let i=0;i<path.length-1;i++){ ref = ref[path[i]]; }
+    ref[path[path.length-1]] = `rgba(${r}, ${g}, ${b}, ${a})`;
+  };
+  const bindOverlayAlpha = (id, path)=>{
+    const el = document.getElementById(id); if (!el) return;
+    el.addEventListener('input', ()=>{ setOverlayAlpha(path, parseFloat(el.value)); savePalette(); });
+  };
+  bindOverlayAlpha('bubbleLineAlpha', ['overlay','bubble','line']);
+  bindOverlayAlpha('bubbleLinePeakAlpha', ['overlay','bubble','linePeak']);
+  bindOverlayAlpha('bubbleFillAlpha', ['overlay','bubble','fill']);
+  bindOverlayAlpha('bubbleFillPeakAlpha', ['overlay','bubble','fillPeak']);
+  // Fluid handlers
+  const bindFluid = (id, key)=>{
+    const el = document.getElementById(id); if (!el) return;
+    el.addEventListener('input', ()=>{
+      palette.fluid[key].base = hexToBase(el.value, key); savePalette();
+    });
+  };
+  bindFluid('subColor', 'sub');
+  bindFluid('bassAColor', 'bassA');
+  bindFluid('bassBColor', 'bassB');
+  bindFluid('midColor', 'mid');
+  bindFluid('trebleAColor', 'trebleA');
+  bindFluid('trebleBColor', 'trebleB');
+}
+
 // ========== AUDIO INIT ==========
 function initAudioContext() {
   if (audioContext) return;
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
   analyser = audioContext.createAnalyser();
-  analyser.fftSize = 2048;
+  
+  // FFT-Größe automatisch an Bildschirmauflösung anpassen
+  const screenPixels = window.innerWidth * window.innerHeight;
+  let fftSize;
+  if (screenPixels < 921600) { // < HD (1280x720)
+    fftSize = 512;
+  } else if (screenPixels < 2073600) { // < Full HD (1920x1080)
+    fftSize = 1024;
+  } else if (screenPixels < 8294400) { // < 4K (3840x2160)
+    fftSize = 2048;
+  } else { // 4K und größer
+    fftSize = 4096;
+  }
+  
+  analyser.fftSize = fftSize;
   analyser.minDecibels = -100;
   analyser.maxDecibels = -30;
   analyser.smoothingTimeConstant = 0.8;
@@ -482,11 +665,11 @@ function createPoints() {
 
 function drawAverageCircle() {
   if (AVG_BREAK_POINT_HIT) {
-    overlayCtx.strokeStyle = bubble_avg_line_color_2;
-    overlayCtx.fillStyle = bubble_avg_color_2;
+    overlayCtx.strokeStyle = palette.overlay.bubble.linePeak;
+    overlayCtx.fillStyle = palette.overlay.bubble.fillPeak;
   } else {
-    overlayCtx.strokeStyle = bubble_avg_line_color;
-    overlayCtx.fillStyle = bubble_avg_color;
+    overlayCtx.strokeStyle = palette.overlay.bubble.line;
+    overlayCtx.fillStyle = palette.overlay.bubble.fill;
   }
 
   overlayCtx.beginPath();
@@ -500,12 +683,12 @@ function drawAverageCircle() {
 function drawWaveform() {
   if (AVG_BREAK_POINT_HIT) {
     rotation += waveform_tick;
-    overlayCtx.strokeStyle = waveform_line_color_2;
-    overlayCtx.fillStyle = waveform_color_2;
+    overlayCtx.strokeStyle = palette.overlay.wave.strokePeak;
+    overlayCtx.fillStyle = palette.overlay.wave.fillPeak;
   } else {
     rotation += -waveform_tick;
-    overlayCtx.strokeStyle = waveform_line_color;
-    overlayCtx.fillStyle = waveform_color;
+    overlayCtx.strokeStyle = palette.overlay.wave.stroke;
+    overlayCtx.fillStyle = palette.overlay.wave.fill;
   }
 
   overlayCtx.beginPath();
@@ -557,7 +740,7 @@ function drawWaveform() {
       let height = h * percent;
       let offset = h - height - 1;
       let barWidth = w / TOTAL_POINTS;
-      overlayCtx.fillStyle = waveform_line_color_2;
+      overlayCtx.fillStyle = palette.overlay.wave.strokePeak;
       overlayCtx.fillRect(i * barWidth, offset, 1, 1);
     }
     overlayCtx.stroke();
@@ -643,7 +826,7 @@ function processAudioFrame() {
       x: centerX, y: centerY,
       dx: (Math.random() - 0.5) * 15 * explosionPower,
       dy: -subBass * 1.5 * explosionPower,
-      color: [8 * intensity * explosionPower, 0.5 * intensity, 2 * intensity]
+      color: colorFromPalette('sub', intensity * explosionPower)
     });
     
     if (subBassEnergy > 0.3) {
@@ -664,12 +847,12 @@ function processAudioFrame() {
         const y = canvas.height * (0.7 + Math.random() * 0.25);
         const angle = -Math.PI * (0.3 + Math.random() * 0.4);
         const force = subBass * 1.2 * subBassEnergy * (0.5 + Math.random());
-        splatStack.push({ x, y, dx: Math.cos(angle) * force, dy: Math.sin(angle) * force, color: [7 * intensity * subBassEnergy, 0.3 * intensity * subBassEnergy, 1.5 * intensity] });
+        splatStack.push({ x, y, dx: Math.cos(angle) * force, dy: Math.sin(angle) * force, color: colorFromPalette('sub', intensity * subBassEnergy) });
       }
       
       if (subBassEnergy > 0.8) {
         for (let i = 0; i < 3; i++) {
-          splatStack.push({ x: canvas.width * (0.3 + i * 0.2), y: canvas.height * 0.99, dx: (Math.random() - 0.5) * 8, dy: -subBass * 2.5 * subBassEnergy, color: [10 * subBassEnergy, 0.5 * subBassEnergy, 2.5 * subBassEnergy] });
+          splatStack.push({ x: canvas.width * (0.3 + i * 0.2), y: canvas.height * 0.99, dx: (Math.random() - 0.5) * 8, dy: -subBass * 2.5 * subBassEnergy, color: colorFromPalette('sub', subBassEnergy) });
         }
       }
     }
@@ -682,8 +865,8 @@ function processAudioFrame() {
     const dx = (Math.random() - 0.5) * bass * 0.5 * pumpPower;
     const dy = -bass * 0.8 * pumpPower;
     
-    splatStack.push({ x: emitters[0].x * canvas.width, y: emitters[0].y * canvas.height, dx, dy, color: [6 * intensity * pumpPower, 0.3 * intensity, 1.5 * intensity] });
-    splatStack.push({ x: emitters[1].x * canvas.width, y: emitters[1].y * canvas.height, dx: -dx, dy, color: [5 * intensity * pumpPower, 0.2 * intensity, 4 * intensity * pumpPower] });
+    splatStack.push({ x: emitters[0].x * canvas.width, y: emitters[0].y * canvas.height, dx, dy, color: colorFromPalette('bassA', intensity * pumpPower) });
+    splatStack.push({ x: emitters[1].x * canvas.width, y: emitters[1].y * canvas.height, dx: -dx, dy, color: colorFromPalette('bassB', intensity * pumpPower) });
     
     if (bassEnergy > 0.3) {
       const velInput = bass * 0.05 * bassEnergy;
@@ -697,7 +880,7 @@ function processAudioFrame() {
         const y = canvas.height * (0.6 + Math.random() * 0.35);
         const angle = -Math.PI/2 + (Math.random() - 0.5) * 1.0;
         const force = bass * 0.8 * bassEnergy;
-        splatStack.push({ x, y, dx: Math.cos(angle) * force, dy: Math.sin(angle) * force, color: [5 * intensity * bassEnergy, 0.2 * intensity * bassEnergy, 2 * intensity] });
+        splatStack.push({ x, y, dx: Math.cos(angle) * force, dy: Math.sin(angle) * force, color: colorFromPalette('bassA', intensity * bassEnergy) });
       }
     }
   }
@@ -707,7 +890,7 @@ function processAudioFrame() {
     const intensity = Math.min(mid / 500, 0.15);
     const angle = Date.now() * 0.002;
     const force = mid * 0.08;
-    splatStack.push({ x: emitters[2].x * canvas.width, y: emitters[2].y * canvas.height, dx: Math.cos(angle) * force, dy: Math.sin(angle) * force, color: [0.3 * intensity, 0.2 * intensity, 1.2 * intensity] });
+    splatStack.push({ x: emitters[2].x * canvas.width, y: emitters[2].y * canvas.height, dx: Math.cos(angle) * force, dy: Math.sin(angle) * force, color: colorFromPalette('mid', intensity) });
   }
   
   // HÖHEN (tiefes Blau / Cyan-Blau)
@@ -715,8 +898,8 @@ function processAudioFrame() {
     const intensity = Math.min(treble / 500, 0.12);
     const dx = (Math.random() - 0.5) * treble * 0.05;
     const dy = (Math.random() - 0.5) * treble * 0.05;
-    splatStack.push({ x: emitters[3].x * canvas.width, y: emitters[3].y * canvas.height, dx, dy, color: [0.15 * intensity, 0.3 * intensity, 0.8 * intensity] });
-    splatStack.push({ x: emitters[4].x * canvas.width, y: emitters[4].y * canvas.height, dx: -dx, dy: -dy, color: [0.2 * intensity, 0.15 * intensity, 0.7 * intensity] });
+    splatStack.push({ x: emitters[3].x * canvas.width, y: emitters[3].y * canvas.height, dx, dy, color: colorFromPalette('trebleA', intensity) });
+    splatStack.push({ x: emitters[4].x * canvas.width, y: emitters[4].y * canvas.height, dx: -dx, dy: -dy, color: colorFromPalette('trebleB', intensity) });
   }
   
   lastSubBass = subBass; lastBass = bass; lastMid = mid;
@@ -1004,4 +1187,5 @@ setInterval(() => {
 
 // ========== START ==========
 initOverlayCanvas();
+try { setupPaletteUI(); } catch(e) { /* noop */ }
 update();

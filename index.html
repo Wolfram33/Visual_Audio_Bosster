@@ -94,6 +94,30 @@
         #audioPlayer {
             display: none;
         }
+
+        /* Farb-Panel */
+        .palette-panel {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            width: 320px;
+            max-height: 70vh;
+            overflow: auto;
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 14px 16px;
+            border-radius: 12px;
+            z-index: 200;
+            display: none;
+        }
+        .palette-panel h3 { font-size: 16px; margin: 6px 0 10px; }
+        .palette-panel .section { margin-bottom: 12px; }
+        .palette-panel .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; }
+        .palette-panel label { font-size: 12px; opacity: 0.9; }
+        .palette-panel input[type="color"] { width: 36px; height: 24px; border: none; background: transparent; padding: 0; }
+        .palette-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+        .palette-actions button { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .palette-actions button:hover { background: rgba(255,255,255,0.25); }
     </style>
 </head>
 <body>
@@ -108,7 +132,43 @@
         <button onclick="prevTrack()">⏮️</button>
         <button id="playBtn" onclick="togglePlay()">▶️ Play</button>
         <button onclick="nextTrack()">⏭️</button>
+        <button onclick="togglePalette()">🎨 Farben</button>
         <input type="file" id="audioFiles" style="display:none" accept="audio/*,.m3u,.m3u8,.pls,.asx,.xspf" multiple onchange="loadPlaylist(event)">
+    </div>
+
+    <div id="palettePanel" class="palette-panel">
+        <h3>🎨 Farben anpassen</h3>
+        <div class="section">
+            <strong>Overlay – Waveform</strong>
+            <div class="row"><label for="waveStroke">Stroke normal</label><input type="color" id="waveStroke"></div>
+            <div class="row"><label for="waveStrokePeak">Stroke Peak</label><input type="color" id="waveStrokePeak"></div>
+            <div class="row"><label for="waveFill">Fill normal</label><input type="color" id="waveFill"></div>
+            <div class="row"><label for="waveFillPeak">Fill Peak</label><input type="color" id="waveFillPeak"></div>
+        </div>
+        <div class="section">
+            <strong>Overlay – Bubble</strong>
+            <div class="row"><label for="bubbleLine">Line normal</label><input type="color" id="bubbleLine"></div>
+            <div class="row"><label for="bubbleLineAlpha">Alpha Line</label><input type="range" id="bubbleLineAlpha" min="0" max="1" step="0.01"></div>
+            <div class="row"><label for="bubbleLinePeak">Line Peak</label><input type="color" id="bubbleLinePeak"></div>
+            <div class="row"><label for="bubbleLinePeakAlpha">Alpha Line Peak</label><input type="range" id="bubbleLinePeakAlpha" min="0" max="1" step="0.01"></div>
+            <div class="row"><label for="bubbleFill">Fill normal</label><input type="color" id="bubbleFill"></div>
+            <div class="row"><label for="bubbleFillAlpha">Alpha Fill</label><input type="range" id="bubbleFillAlpha" min="0" max="1" step="0.01"></div>
+            <div class="row"><label for="bubbleFillPeak">Fill Peak</label><input type="color" id="bubbleFillPeak"></div>
+            <div class="row"><label for="bubbleFillPeakAlpha">Alpha Fill Peak</label><input type="range" id="bubbleFillPeakAlpha" min="0" max="1" step="0.01"></div>
+        </div>
+        <div class="section">
+            <strong>Fluid – Bänder</strong>
+            <div class="row"><label for="subColor">Sub</label><input type="color" id="subColor"></div>
+            <div class="row"><label for="bassAColor">Bass A</label><input type="color" id="bassAColor"></div>
+            <div class="row"><label for="bassBColor">Bass B</label><input type="color" id="bassBColor"></div>
+            <div class="row"><label for="midColor">Mid</label><input type="color" id="midColor"></div>
+            <div class="row"><label for="trebleAColor">Treble A</label><input type="color" id="trebleAColor"></div>
+            <div class="row"><label for="trebleBColor">Treble B</label><input type="color" id="trebleBColor"></div>
+        </div>
+        <div class="palette-actions">
+            <button onclick="resetPalette()">Zurücksetzen</button>
+            <button onclick="togglePalette()">Schließen</button>
+        </div>
     </div>
 
 <script src="index.js"></script>
