@@ -6,7 +6,7 @@ Ein hochkomplexer, immersiver Audio-Visualizer, der mehrere fortgeschrittene Web
 
 **[robderoy.de/apps/sound](https://robderoy.de/apps/sound/)**
 
-![Audio Fluid Visualizer](preview.gif)
+![Audio Fluid Visualizer](auio-visualisierung.gif)
 
 ## ✨ Features
 
